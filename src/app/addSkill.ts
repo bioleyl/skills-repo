@@ -1,9 +1,9 @@
 import { findSkill } from '../core/index.js';
-import { applyAdd, lockfileEntry } from '../core/lockfile.js';
+import { applyAdd, lockfileEntry, serializeLockfile } from '../core/lockfile.js';
 import { checkDocManifestConsistency, parseSkillJson } from '../core/manifest.js';
 import { planInstall } from '../core/planInstall.js';
 import { parseSkillMd } from '../core/skillDoc.js';
-import { readLockfile, writeLockfile } from './helpers.js';
+import { lockfilePathFor, readLockfile } from './helpers.js';
 
 import type { InstallPolicy } from '../core/targets.js';
 import type { InstallTarget } from '../types/domain.js';
@@ -13,6 +13,7 @@ export interface AddSkillInput {
   readonly name: string;
   readonly policy: InstallPolicy;
   readonly force?: boolean;
+  readonly allowIncompatible?: boolean;
 }
 
 export interface AddSkillOutput {
@@ -77,6 +78,15 @@ export async function addSkill(context: AppContext, input: AddSkillInput): Promi
     context.detector.detect(),
     context.environment
   );
+  const incompatibleAgents = plan.targets
+    .map((target) => target.agent)
+    .filter((agent) => !manifest.value.compatibility.includes(agent));
+  if (incompatibleAgents.length > 0 && input.allowIncompatible !== true) {
+    return {
+      error: { agents: [...new Set(incompatibleAgents)], type: 'incompatible' },
+      ok: false,
+    };
+  }
   const lockfile = await readLockfile(context, input.policy.scope, context.source);
   if (!lockfile.ok) {
     return lockfile;
@@ -96,19 +106,6 @@ export async function addSkill(context: AppContext, input: AddSkillInput): Promi
     return { error: { paths: conflicts, type: 'conflict' }, ok: false };
   }
 
-  for (const operation of plan.operations) {
-    if (operation.content === undefined) {
-      return invalidSkill(`Missing content for ${operation.path}`);
-    }
-    const written = await context.fs.writeFile(operation.path, operation.content);
-    if (!written.ok) {
-      return {
-        error: { message: written.error.message, path: written.error.path, type: 'filesystem' },
-        ok: false,
-      };
-    }
-  }
-
   const updated = applyAdd(
     lockfile.value,
     lockfileEntry(
@@ -119,9 +116,17 @@ export async function addSkill(context: AppContext, input: AddSkillInput): Promi
       plan.targets.map(({ agent, path }) => ({ agent, path }))
     )
   );
-  const writtenLockfile = await writeLockfile(context, input.policy.scope, updated);
-  if (!writtenLockfile.ok) {
-    return writtenLockfile;
+  const operations = [
+    ...plan.operations,
+    {
+      action: 'write' as const,
+      content: serializeLockfile(updated),
+      path: lockfilePathFor(context, input.policy.scope),
+    },
+  ];
+  const applied = await context.fs.apply(operations);
+  if (!applied.ok) {
+    return { error: { message: applied.error.message, path: applied.error.path, type: 'filesystem' }, ok: false };
   }
 
   return {

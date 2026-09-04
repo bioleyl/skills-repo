@@ -4,12 +4,14 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { createCachedRegistryClient } from '../src/infra/cache.js';
+import { createFsAdapter } from '../src/infra/fsAdapter.js';
 import { createGithubRegistryClient } from '../src/infra/githubClient.js';
 import { createLocalRegistryClient } from '../src/infra/localRegistryClient.js';
 import { buildRegistry } from '../src/infra/registryBuilder.js';
 
 import type { Result } from '../src/types/domain.js';
-import type { HttpPort } from '../src/types/ports.js';
+import type { ClockPort, FsPort, HttpPort, RegistryClientPort } from '../src/types/ports.js';
 
 const sha = '0123456789abcdef0123456789abcdef01234567';
 const source = { ownerRepo: 'owner/repo', ref: 'main' } as const;
@@ -41,6 +43,78 @@ function fakeHttp(routes: Readonly<Record<string, string>>): HttpPort {
     },
   };
 }
+
+describe('registry cache', () => {
+  it('keeps files from different skills in separate cache entries', async () => {
+    const cacheFiles = new Map<string, string>();
+    const fs: FsPort = {
+      apply: async (operations) => {
+        for (const operation of operations) {
+          if (operation.action === 'delete') {
+            cacheFiles.delete(operation.path);
+            continue;
+          }
+          if (operation.content === undefined) {
+            return { error: { message: 'missing content', path: operation.path, type: 'write' }, ok: false };
+          }
+          cacheFiles.set(operation.path, operation.content);
+        }
+        return { ok: true, value: undefined };
+      },
+      exists: async (path) => cacheFiles.has(path),
+      mkdir: async () => ({ ok: true, value: undefined }),
+      readFile: async (path) => {
+        const value = cacheFiles.get(path);
+        return value === undefined
+          ? { error: { message: 'missing', path, type: 'read' }, ok: false }
+          : { ok: true, value };
+      },
+      rm: async (path) => {
+        cacheFiles.delete(path);
+        return { ok: true, value: undefined };
+      },
+      writeFile: async (path, content) => {
+        cacheFiles.set(path, content);
+        return { ok: true, value: undefined };
+      },
+    };
+    const client: RegistryClientPort = {
+      fetchSkillFiles: async (_source, skillPath, _sha, files) => ({
+        ok: true,
+        value: files.map((path) => ({ content: `${skillPath}/${path}`, path })),
+      }),
+      getIndex: async () => ({ error: { message: 'unused', type: 'network' }, ok: false }),
+    };
+    const clock: ClockPort = { now: () => new Date('2025-09-04T12:00:00Z') };
+    const cached = createCachedRegistryClient(client, fs, clock, { directory: '/cache' });
+
+    const first = await cached.fetchSkillFiles(source, 'skills/first', sha, ['SKILL.md', 'skill.json']);
+    const second = await cached.fetchSkillFiles(source, 'skills/second', sha, ['SKILL.md', 'skill.json']);
+
+    expect(first.ok && first.value[0]?.content).toBe('skills/first/SKILL.md');
+    expect(second.ok && second.value[0]?.content).toBe('skills/second/SKILL.md');
+  });
+});
+
+describe('filesystem adapter', () => {
+  it('rolls back a multi-file operation when a later operation fails', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'skills-repo-'));
+    try {
+      const fs = createFsAdapter(root);
+      await fs.writeFile('existing.txt', 'before');
+      const result = await fs.apply([
+        { action: 'write', content: 'after', path: 'existing.txt' },
+        { action: 'write', path: 'new.txt' },
+      ]);
+
+      expect(result.ok).toBe(false);
+      expect(await fs.readFile('existing.txt')).toMatchObject({ ok: true, value: 'before' });
+      expect(await fs.exists('new.txt')).toBe(false);
+    } finally {
+      await rm(root, { force: true, recursive: true });
+    }
+  });
+});
 
 describe('GitHub registry client', () => {
   it('fetches and parses the index and skill files', async () => {

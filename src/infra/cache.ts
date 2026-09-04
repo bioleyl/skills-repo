@@ -1,4 +1,6 @@
-import type { RegistryIndex, RegistrySource, SkillFile } from '../types/domain.js';
+import { parseRegistryIndex } from '../core/index.js';
+
+import type { RegistrySource, SkillFile } from '../types/domain.js';
 import type { ClockPort, FsPort, RegistryClientPort } from '../types/ports.js';
 
 interface CacheEntry<T> {
@@ -7,7 +9,35 @@ interface CacheEntry<T> {
 }
 
 function cacheKey(source: RegistrySource): string {
-  return `${source.ownerRepo.replace(/[^a-zA-Z0-9._-]/g, '_')}_${source.ref.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+  return encodeURIComponent(JSON.stringify([source.ownerRepo, source.ref]));
+}
+
+function cachedFilesPath(root: string, source: RegistrySource, sha: string, skillPath: string): string {
+  return `${root}/${cacheKey(source)}_${encodeURIComponent(sha)}_${encodeURIComponent(skillPath)}.files.json`;
+}
+
+function isSafeRelativePath(path: string): boolean {
+  return (
+    !path.startsWith('/')
+    && !path.includes('\\')
+    && path.split('/').every((segment) => segment !== '' && segment !== '.' && segment !== '..')
+  );
+}
+
+function isSkillFiles(value: unknown): value is readonly SkillFile[] {
+  return (
+    Array.isArray(value)
+    && value.every(
+      (entry) =>
+        typeof entry === 'object'
+        && entry !== null
+        && 'path' in entry
+        && typeof entry.path === 'string'
+        && isSafeRelativePath(entry.path)
+        && 'content' in entry
+        && typeof entry.content === 'string'
+    )
+  );
 }
 
 function cachedPath(root: string, source: RegistrySource, suffix: string): string {
@@ -33,7 +63,18 @@ export function createCachedRegistryClient(
       return undefined;
     }
     try {
-      const entry = JSON.parse(result.value) as CacheEntry<T>;
+      const input: unknown = JSON.parse(result.value);
+      if (
+        typeof input !== 'object'
+        || input === null
+        || !('cachedAt' in input)
+        || typeof input.cachedAt !== 'string'
+        || !('value' in input)
+        || !Number.isFinite(new Date(input.cachedAt).getTime())
+      ) {
+        return undefined;
+      }
+      const entry = input as CacheEntry<T>;
       if (
         maxAgeMs !== Number.POSITIVE_INFINITY
         && clock.now().getTime() - new Date(entry.cachedAt).getTime() > maxAgeMs
@@ -54,10 +95,13 @@ export function createCachedRegistryClient(
   };
   return {
     async fetchSkillFiles(source, skillPath, sha, files) {
-      const path = `${options.directory}/${cacheKey(source)}_${sha}.files.json`;
+      const path = cachedFilesPath(options.directory, source, sha, skillPath);
       if (!options.noCache) {
-        const cached = await readCache<readonly SkillFile[]>(path, Number.POSITIVE_INFINITY);
-        if (cached !== undefined && files.every((file) => cached.some((entry) => entry.path === file))) {
+        const cached = await readCache<unknown>(path, Number.POSITIVE_INFINITY);
+        if (
+          isSkillFiles(cached)
+          && files.every((file) => isSafeRelativePath(file) && cached.some((entry) => entry.path === file))
+        ) {
           return { ok: true, value: cached.filter((entry) => files.includes(entry.path)) };
         }
       }
@@ -69,9 +113,12 @@ export function createCachedRegistryClient(
     },
     async getIndex(source) {
       if (!options.noCache) {
-        const cached = await readCache<RegistryIndex>(cachedPath(options.directory, source, 'index'));
+        const cached = await readCache<unknown>(cachedPath(options.directory, source, 'index'));
         if (cached !== undefined) {
-          return { ok: true, value: cached };
+          const parsed = parseRegistryIndex(JSON.stringify(cached));
+          if (parsed.ok) {
+            return parsed;
+          }
         }
       }
       const result = await client.getIndex(source);

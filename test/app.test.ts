@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { addSkill } from '../src/app/addSkill.js';
+import { readLockfile } from '../src/app/helpers.js';
 import { removeSkills } from '../src/app/removeSkill.js';
 
 import type { AppContext } from '../src/app/context.js';
@@ -29,6 +30,23 @@ const index: RegistryIndex = {
 function fakeContext(): { readonly context: AppContext; readonly files: Map<string, string> } {
   const files = new Map<string, string>();
   const fs: FsPort = {
+    apply: async (operations) => {
+      for (const operation of operations) {
+        if (operation.action === 'delete') {
+          for (const file of files.keys()) {
+            if (file === operation.path || file.startsWith(`${operation.path}/`)) {
+              files.delete(file);
+            }
+          }
+          continue;
+        }
+        if (operation.content === undefined) {
+          return { error: { message: 'missing content', path: operation.path, type: 'write' }, ok: false };
+        }
+        files.set(operation.path, operation.content);
+      }
+      return { ok: true, value: undefined };
+    },
     exists: async (path) => files.has(path),
     mkdir: async () => ({ ok: true, value: undefined }),
     readFile: async (path): Promise<Result<string, FsError>> => {
@@ -82,6 +100,19 @@ function fakeContext(): { readonly context: AppContext; readonly files: Map<stri
 }
 
 describe('skill app use cases', () => {
+  it('rejects a lockfile created for another registry', async () => {
+    const { context, files } = fakeContext();
+    files.set(
+      'skills.lock.json',
+      JSON.stringify({ registry: { ownerRepo: 'other/repo', ref: 'main' }, skills: [], version: 1 })
+    );
+
+    await expect(readLockfile(context, 'project', source)).resolves.toMatchObject({
+      error: { type: 'invalid-lockfile' },
+      ok: false,
+    });
+  });
+
   it('adds, records, conflicts, and removes a skill', async () => {
     const { context, files } = fakeContext();
     const added = await addSkill(context, { name: 'demo-skill', policy: { scope: 'project' } });

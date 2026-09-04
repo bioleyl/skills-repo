@@ -14,6 +14,7 @@ export interface UpdateSkill {
 
 export interface UpdateOutput {
   readonly updates: readonly UpdateSkill[];
+  readonly unavailable: readonly string[];
   readonly dryRun: boolean;
 }
 
@@ -42,14 +43,19 @@ export async function updateSkills(
   }
 
   const updates: UpdateSkill[] = [];
+  const unavailable: string[] = [];
   for (const installed of selected) {
     const available = findSkill(index.value, installed.name);
-    if (available !== undefined && hasSkillChanged(installed, available, index.value.commitSha)) {
+    if (available === undefined) {
+      unavailable.push(installed.name);
+      continue;
+    }
+    if (hasSkillChanged(installed, available, index.value.commitSha)) {
       updates.push({ from: installed.version, name: installed.name, to: available.version });
     }
   }
-  if (dryRun || updates.length === 0) {
-    return { ok: true, value: { dryRun, updates } };
+  if (dryRun || (updates.length === 0 && unavailable.length === 0)) {
+    return { ok: true, value: { dryRun, unavailable, updates } };
   }
 
   for (const update of updates) {
@@ -66,5 +72,5 @@ export async function updateSkills(
       return result;
     }
   }
-  return { ok: true, value: { dryRun: false, updates } };
+  return { ok: true, value: { dryRun: false, unavailable, updates } };
 }

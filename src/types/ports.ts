@@ -1,4 +1,12 @@
-import type { AgentId, DetectedAgent, RegistryIndex, RegistrySource, Result, SkillFile } from './domain.js';
+import type {
+  AgentId,
+  DetectedAgent,
+  FileOperation,
+  RegistryIndex,
+  RegistrySource,
+  Result,
+  SkillFile,
+} from './domain.js';
 
 export interface HttpBody {
   readonly status: number;
@@ -35,6 +43,7 @@ export interface RegistryError {
 export interface FsPort {
   readFile(path: string): Promise<Result<string, FsError>>;
   writeFile(path: string, content: string): Promise<Result<void, FsError>>;
+  apply(operations: readonly FileOperation[]): Promise<Result<void, FsError>>;
   mkdir(path: string): Promise<Result<void, FsError>>;
   rm(path: string): Promise<Result<void, FsError>>;
   exists(path: string): Promise<boolean>;

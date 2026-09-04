@@ -47,6 +47,16 @@ function print(value: unknown, human: string | undefined, json: boolean): void {
   process.stdout.write(`${json ? renderJson(value) : (human ?? '')}\n`);
 }
 
+async function confirmIncompatible(agents: readonly string[]): Promise<boolean> {
+  if (process.stdin.isTTY !== true) {
+    return false;
+  }
+  const approved = await confirm({
+    message: `This skill is not marked compatible with: ${agents.join(', ')}. Continue?`,
+  });
+  return !isCancel(approved) && approved;
+}
+
 export function createProgram(): Command {
   const program = new Command()
     .name('skills-repo')
@@ -108,14 +118,23 @@ export function createProgram(): Command {
       }
       const values = [];
       for (const name of names) {
-        const result = await addSkill(runtime.context, {
+        const input = {
+          allowIncompatible: commandOptions.yes === true,
           ...(commandOptions.force === undefined ? {} : { force: commandOptions.force }),
           name,
           policy: {
             ...(agents === undefined ? {} : { agents }),
             scope: (commandOptions.scope ?? runtime.scope) as Scope,
           },
-        });
+        };
+        let result = await addSkill(runtime.context, input);
+        if (!result.ok && result.error.type === 'incompatible') {
+          const approved = await confirmIncompatible(result.error.agents);
+          if (!approved) {
+            return handle(result, options.json);
+          }
+          result = await addSkill(runtime.context, { ...input, allowIncompatible: true });
+        }
         if (!result.ok) {
           return handle(result, options.json);
         }
@@ -129,8 +148,19 @@ export function createProgram(): Command {
     .argument('<skills...>')
     .option('--scope <scope>', 'project or user')
     .option('--yes', 'confirm removal')
-    .action(async function (names: string[], commandOptions: { readonly scope?: Scope }) {
+    .action(async function (names: string[], commandOptions: { readonly scope?: Scope; readonly yes?: boolean }) {
       const options = globalOptions(this);
+      if (commandOptions.yes !== true) {
+        if (process.stdin.isTTY !== true) {
+          process.stderr.write('Removal requires --yes in non-interactive mode\n');
+          process.exitCode = 2;
+          return;
+        }
+        const approved = await confirm({ message: `Remove these skills?\n${names.join('\n')}` });
+        if (isCancel(approved) || !approved) {
+          return;
+        }
+      }
       const selectedScope = commandOptions.scope ?? options.scope;
       const runtime = createRuntime({
         ...options,

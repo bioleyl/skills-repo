@@ -7,6 +7,7 @@ export interface InstalledSkill {
   readonly name: string;
   readonly version: string;
   readonly targets: readonly string[];
+  readonly available: boolean;
   readonly upToDate: boolean;
 }
 
@@ -34,6 +35,7 @@ export async function listSkills(
     value: lockfile.value.skills.map((skill): InstalledSkill => {
       const availableSkill = index.value.skills.find((candidate) => candidate.name === skill.name);
       return {
+        available: availableSkill !== undefined,
         name: skill.name,
         targets: skill.targets.map((target) => target.agent),
         upToDate: availableSkill !== undefined && !hasSkillChanged(skill, availableSkill, index.value.commitSha),

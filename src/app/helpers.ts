@@ -17,7 +17,19 @@ export async function readLockfile(
     return { error: { message: content.error.message, path: content.error.path, type: 'filesystem' }, ok: false };
   }
   const parsed = parseLockfile(content.value);
-  return parsed.ok ? parsed : { error: { message: parsed.error.message, type: 'invalid-lockfile' }, ok: false };
+  if (!parsed.ok) {
+    return { error: { message: parsed.error.message, type: 'invalid-lockfile' }, ok: false };
+  }
+  if (parsed.value.registry.ownerRepo !== source.ownerRepo || parsed.value.registry.ref !== source.ref) {
+    return {
+      error: {
+        message: `Lockfile belongs to ${parsed.value.registry.ownerRepo}@${parsed.value.registry.ref}`,
+        type: 'invalid-lockfile',
+      },
+      ok: false,
+    };
+  }
+  return parsed;
 }
 
 export async function writeLockfile(

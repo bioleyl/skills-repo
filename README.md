@@ -2,7 +2,7 @@
 
 A lightweight npm-style registry for AI agent skills. The `skills-repo` CLI downloads reviewed skill files from a public GitHub repository and installs them into the directories used by Claude Code, Codex, Cursor, Windsurf, and other compatible agents.
 
-> Skills are instructions that an agent will read. Review a skill's description and contents before installing it.
+> Skills are instructions that an agent will read. Review a skill's description and contents before installing it. The CLI confirms removals interactively; use `--yes` for automated removal.
 
 ## Install
 
@@ -17,7 +17,7 @@ The npm package is `@bioleyl/skills-repo` and it exposes the `skills-repo` binar
 ```text
 skills-repo init [--scope project|user]
 skills-repo add <skill...> [--agent <ids...>] [--scope project|user] [--force]
-skills-repo remove <skill...> [--scope project|user]
+skills-repo remove <skill...> [--scope project|user] [--yes]
 skills-repo list [--available]
 skills-repo search <query> [--keyword]
 skills-repo info <skill>

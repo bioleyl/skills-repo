@@ -19,8 +19,20 @@ export function renderList(values: readonly unknown[]): string {
       if (typeof value !== 'object' || value === null) {
         return String(value);
       }
-      const item = value as { readonly name?: unknown; readonly version?: unknown; readonly upToDate?: unknown };
-      return `${String(item.name)}${item.version === undefined ? '' : `@${String(item.version)}`}${item.upToDate === false ? ' (update available)' : ''}`;
+      const item = value as {
+        readonly name?: unknown;
+        readonly version?: unknown;
+        readonly available?: unknown;
+        readonly upToDate?: unknown;
+      };
+      let status = '';
+      if (item.available === false) {
+        status = ' (unavailable)';
+      } else if (item.upToDate === false) {
+        status = ' (update available)';
+      }
+      const version = item.version === undefined ? '' : `@${String(item.version)}`;
+      return `${String(item.name)}${version}${status}`;
     })
     .join('\n');
 }
@@ -46,12 +58,15 @@ export function renderInfo(value: {
 
 export function renderUpdates(value: {
   readonly updates: readonly { readonly name: string; readonly from: string; readonly to: string }[];
+  readonly unavailable?: readonly string[];
   readonly dryRun: boolean;
 }): string {
-  if (value.updates.length === 0) {
-    return 'All installed skills are up to date.';
+  const lines = value.updates.map((update) => `${update.name}: ${update.from} -> ${update.to}`);
+  const unavailable = value.unavailable ?? [];
+  if (unavailable.length > 0) {
+    lines.push(`Unavailable: ${unavailable.join(', ')}`);
   }
-  return value.updates.map((update) => `${update.name}: ${update.from} -> ${update.to}`).join('\n');
+  return lines.length === 0 ? 'All installed skills are up to date.' : lines.join('\n');
 }
 
 export function renderSearch(

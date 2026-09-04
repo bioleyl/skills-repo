@@ -11,6 +11,8 @@ export function renderError(error: AppError): RenderedError {
       return { exitCode: 1, message: `Refusing to overwrite: ${error.paths.join(', ')}` };
     case 'filesystem':
       return { exitCode: 1, message: `${error.message} (${error.path})` };
+    case 'incompatible':
+      return { exitCode: 1, message: `Skill is not compatible with: ${error.agents.join(', ')}` };
     case 'invalid-lockfile':
       return { exitCode: 1, message: `Invalid lockfile: ${error.message}` };
     case 'invalid-skill':

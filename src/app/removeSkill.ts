@@ -1,6 +1,6 @@
-import { applyRemove } from '../core/lockfile.js';
+import { applyRemove, serializeLockfile } from '../core/lockfile.js';
 import { resolveInstallTargets } from '../core/targets.js';
-import { readLockfile, writeLockfile } from './helpers.js';
+import { lockfilePathFor, readLockfile } from './helpers.js';
 
 import type { SkillName } from '../types/domain.js';
 import type { AppContext, AppResult } from './context.js';
@@ -46,21 +46,23 @@ export async function removeSkills(
     }
   }
 
-  for (const path of paths) {
-    const result = await context.fs.rm(path);
-    if (!result.ok) {
-      return { error: { message: result.error.message, path: result.error.path, type: 'filesystem' }, ok: false };
-    }
-  }
   const updated = applyRemove(
     lockfile.value,
     entries
       .filter((entry): entry is NonNullable<typeof entry> => entry !== undefined)
       .map((entry) => entry.name as SkillName)
   );
-  const written = await writeLockfile(context, scope, updated);
-  if (!written.ok) {
-    return written;
+  const operations = [
+    ...paths.map((path) => ({ action: 'delete' as const, path })),
+    {
+      action: 'write' as const,
+      content: serializeLockfile(updated),
+      path: lockfilePathFor(context, scope),
+    },
+  ];
+  const applied = await context.fs.apply(operations);
+  if (!applied.ok) {
+    return { error: { message: applied.error.message, path: applied.error.path, type: 'filesystem' }, ok: false };
   }
   return { ok: true, value: { removed: names } };
 }

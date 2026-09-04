@@ -56,6 +56,12 @@ export async function skillInfo(
   if (!consistent.ok) {
     return { error: { message: consistent.error.message, type: 'invalid-skill' }, ok: false };
   }
+  if (parsedManifest.value.name !== entry.name || parsedManifest.value.version !== entry.version) {
+    return {
+      error: { message: 'Downloaded skill metadata does not match registry.json', type: 'invalid-skill' },
+      ok: false,
+    };
+  }
 
   const lockfile = await readLockfile(context, scope, context.source);
   if (!lockfile.ok) {

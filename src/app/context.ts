@@ -17,6 +17,7 @@ export type AppError =
   | { readonly type: 'not-found'; readonly skill: string }
   | { readonly type: 'conflict'; readonly paths: readonly string[] }
   | { readonly type: 'invalid-skill'; readonly message: string }
+  | { readonly type: 'incompatible'; readonly agents: readonly string[] }
   | { readonly type: 'invalid-lockfile'; readonly message: string };
 
 export type AppResult<T> = Result<T, AppError>;
