@@ -1,0 +1,62 @@
+name: Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/**'
+      - 'AGENT.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: registry-main
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Regenerate and commit registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git reset --hard origin/main
+            export GITHUB_SHA="$(git rev-parse HEAD)"
+            npm run build:registry
+
+            if git diff --quiet -- registry.json; then
+              echo 'registry.json is already current'
+              exit 0
+            fi
+
+            git add registry.json
+            git commit -m "chore(registry): regenerate index"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+
+            echo "Push raced with another main update; retrying (${attempt}/3)"
+            git reset --hard origin/main
+          done
+
+          echo 'Could not publish generated registry after three attempts' >&2
+          exit 1

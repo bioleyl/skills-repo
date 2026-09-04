@@ -1,0 +1,7 @@
+{
+  "name": "debug-protocol",
+  "version": "1.0.0",
+  "description": "Use hypothesis-driven debugging: reproduce, isolate, hypothesize, test, fix, and verify. Use when a bug is not immediately obvious.",
+  "keywords": ["debugging", "root-cause"],
+  "license": "MIT"
+}

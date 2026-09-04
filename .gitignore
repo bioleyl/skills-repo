@@ -1,0 +1,5 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+site/skills.json

@@ -1,0 +1,7 @@
+{
+  "name": "pr-reviewer",
+  "version": "1.0.0",
+  "description": "Perform structured code reviews covering correctness, security, performance, and tests with severity-tagged findings. Use when reviewing a PR or code.",
+  "keywords": ["review", "quality"],
+  "license": "MIT"
+}

@@ -1,0 +1,130 @@
+{
+  "commitSha": "0000000000000000000000000000000000000000",
+  "generatedAt": "2026-09-04T14:29:29.850Z",
+  "skills": [
+    {
+      "description": "Maintain CHANGELOG.md in Keep a Changelog format and derive the SemVer bump from commits. Use when preparing a release.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "changelog",
+        "release",
+        "semver"
+      ],
+      "name": "changelog-keeper",
+      "path": "skills/changelog-keeper",
+      "sizeBytes": 858,
+      "version": "1.0.0"
+    },
+    {
+      "description": "Write clean, maintainable code with clear separation of concerns, small pure functions, early-return control flow, and no nested ternaries. Use when implementing, reviewing, or refactoring code.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "coding",
+        "style",
+        "clean-code",
+        "architecture"
+      ],
+      "name": "coding-style",
+      "path": "skills/coding-style",
+      "sizeBytes": 2378,
+      "version": "1.0.0"
+    },
+    {
+      "description": "Write Conventional Commits messages. Use for every git commit.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "git",
+        "commits"
+      ],
+      "name": "commit-lint",
+      "path": "skills/commit-lint",
+      "sizeBytes": 788,
+      "version": "1.0.0"
+    },
+    {
+      "description": "Use hypothesis-driven debugging: reproduce, isolate, hypothesize, test, fix, and verify. Use when a bug is not immediately obvious.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "debugging",
+        "root-cause"
+      ],
+      "name": "debug-protocol",
+      "path": "skills/debug-protocol",
+      "sizeBytes": 944,
+      "version": "1.0.0"
+    },
+    {
+      "description": "Perform structured code reviews covering correctness, security, performance, and tests with severity-tagged findings. Use when reviewing a PR or code.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "review",
+        "quality"
+      ],
+      "name": "pr-reviewer",
+      "path": "skills/pr-reviewer",
+      "sizeBytes": 1162,
+      "version": "1.0.0"
+    },
+    {
+      "description": "Plan safe, incremental refactorings by characterizing behavior first, taking small reversible steps, and keeping tests green. Use when refactoring.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "refactoring",
+        "tech-debt"
+      ],
+      "name": "refactor-plan",
+      "path": "skills/refactor-plan",
+      "sizeBytes": 919,
+      "version": "1.0.0"
+    },
+    {
+      "description": "Author skills for this registry with correct SKILL.md structure, strong capability-and-trigger descriptions, skill.json manifests, and lean instruction bodies. Use when creating or improving a skill.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "skills",
+        "authoring"
+      ],
+      "name": "skill-creator",
+      "path": "skills/skill-creator",
+      "sizeBytes": 1072,
+      "version": "1.0.0"
+    },
+    {
+      "description": "Design tests using equivalence classes, boundary values, error paths, one behavior per test, and appropriate unit versus integration scope. Use when writing tests.",
+      "files": [
+        "SKILL.md",
+        "skill.json"
+      ],
+      "keywords": [
+        "testing",
+        "tdd"
+      ],
+      "name": "test-design",
+      "path": "skills/test-design",
+      "sizeBytes": 964,
+      "version": "1.0.0"
+    }
+  ],
+  "version": 1
+}

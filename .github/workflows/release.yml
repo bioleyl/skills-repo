@@ -1,0 +1,35 @@
+name: Publish npm package
+
+on:
+  workflow_dispatch:
+    inputs:
+      dist-tag:
+        description: npm dist-tag to publish under
+        required: true
+        default: latest
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run depcruise
+      - run: npm test
+      - run: npm run build
+      - name: Publish package
+        run: npm publish --access public --provenance --tag "${{ inputs.dist-tag }}"

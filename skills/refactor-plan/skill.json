@@ -1,0 +1,7 @@
+{
+  "name": "refactor-plan",
+  "version": "1.0.0",
+  "description": "Plan safe, incremental refactorings by characterizing behavior first, taking small reversible steps, and keeping tests green. Use when refactoring.",
+  "keywords": ["refactoring", "tech-debt"],
+  "license": "MIT"
+}

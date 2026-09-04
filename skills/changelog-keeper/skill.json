@@ -1,0 +1,7 @@
+{
+  "name": "changelog-keeper",
+  "version": "1.0.0",
+  "description": "Maintain CHANGELOG.md in Keep a Changelog format and derive the SemVer bump from commits. Use when preparing a release.",
+  "keywords": ["changelog", "release", "semver"],
+  "license": "MIT"
+}

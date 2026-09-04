@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A registry of installable AI agent skills." />
+    <title>skills-repo — AI agent skills</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="shell">
+        <p class="eyebrow">BIOLEYL / SKILLS-REPO</p>
+        <h1>Skills for coding agents.</h1>
+        <p class="intro">Small, reviewed instructions for Claude Code, Codex, Cursor, Windsurf, and compatible agents.</p>
+        <code class="command">npx @bioleyl/skills-repo add &lt;skill&gt;</code>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="toolbar" aria-label="Skill filters">
+        <div>
+          <h2>Available skills</h2>
+          <p id="summary" class="muted">Loading the registry…</p>
+        </div>
+        <label class="search">
+          <span class="visually-hidden">Search skills</span>
+          <input id="search" type="search" placeholder="Search by name, description, or keyword" autocomplete="off" />
+        </label>
+      </section>
+
+      <div id="error" class="error" hidden role="alert"></div>
+      <section id="skills" class="grid" aria-live="polite"></section>
+    </main>
+
+    <footer class="shell footer">
+      <a href="https://github.com/bioleyl/skills-repo">View on GitHub</a>
+      <span>Registry content is fetched at build time.</span>
+    </footer>
+  </body>
+</html>

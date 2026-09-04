@@ -1,0 +1,7 @@
+{
+  "name": "test-design",
+  "version": "1.0.0",
+  "description": "Design tests using equivalence classes, boundary values, error paths, one behavior per test, and appropriate unit versus integration scope. Use when writing tests.",
+  "keywords": ["testing", "tdd"],
+  "license": "MIT"
+}

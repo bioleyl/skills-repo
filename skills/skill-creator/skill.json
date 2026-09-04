@@ -1,0 +1,7 @@
+{
+  "name": "skill-creator",
+  "version": "1.0.0",
+  "description": "Author skills for this registry with correct SKILL.md structure, strong capability-and-trigger descriptions, skill.json manifests, and lean instruction bodies. Use when creating or improving a skill.",
+  "keywords": ["skills", "authoring"],
+  "license": "MIT"
+}
