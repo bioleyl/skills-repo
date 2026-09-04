@@ -32,7 +32,7 @@
     "@clack/prompts": "^1.7.0"
   },
   "devDependencies": {
-    "@types/node": "^22.13.4",
+    "@types/node": "^26.4.0",
     "@types/semver": "^7.7.0",
     "@biomejs/biome": "2.5.7",
     "typescript": "^5.7.3",
