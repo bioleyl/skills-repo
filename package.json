@@ -35,7 +35,7 @@
     "@types/node": "^22.13.4",
     "@types/semver": "^7.7.0",
     "@biomejs/biome": "2.5.7",
-    "typescript": "^5.7.3",
+    "typescript": "^7.0.2",
     "vitest": "^3.0.7",
     "dependency-cruiser": "^18.2.0"
   },
