@@ -1,0 +1,7 @@
+{
+  "name": "skills-repo",
+  "version": "1.0.0",
+  "description": "Use the skills-repo CLI to search, inspect, install, update, and remove agent skills. Use when managing skills for the current agent or project.",
+  "keywords": ["skills", "registry", "install", "updates", "agents"],
+  "license": "MIT"
+}
