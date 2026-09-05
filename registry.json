@@ -1,6 +1,6 @@
 {
-  "commitSha": "d79b9817611c194f2167861abc6e491ee3c52ece",
-  "generatedAt": "2026-09-05T10:31:29.820Z",
+  "commitSha": "c11453e71971baf676d860f15ddfebb3014ca291",
+  "generatedAt": "2026-09-05T11:24:09.557Z",
   "skills": [
     {
       "description": "Maintain CHANGELOG.md in Keep a Changelog format and derive the SemVer bump from commits. Use when preparing a release.",
