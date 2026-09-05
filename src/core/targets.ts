@@ -1,4 +1,4 @@
-import type { AgentId, DetectedAgent, Scope, SkillName } from '../types/domain.js';
+import type { AgentId, DetectedAgent, Scope } from '../types/domain.js';
 
 export interface TargetEnvironment {
   readonly configHome?: string;
@@ -52,7 +52,7 @@ export function resolveAgents(
 export function resolveInstallTargets(
   policy: InstallPolicy,
   detectedAgents: readonly DetectedAgent[],
-  skillName: SkillName,
+  skillName: string,
   environment: TargetEnvironment
 ): readonly { readonly agent: AgentId; readonly scope: Scope; readonly path: string }[] {
   const agents = resolveAgents(detectedAgents, policy.agents);

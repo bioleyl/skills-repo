@@ -72,4 +72,14 @@ export interface ConsolePort {
   stderr(message: string): void;
 }
 
+export interface ScriptExecutorPort {
+  execute(scriptPath: string, cwd: string): Promise<Result<void, ScriptError>>;
+}
+
+export interface ScriptError {
+  readonly type: 'script-failed';
+  readonly message: string;
+  readonly code: number | null;
+}
+
 export const agentIds: readonly AgentId[] = ['portable', 'claude-code', 'codex', 'cursor', 'windsurf'];

@@ -1,6 +1,6 @@
 import { skillDocSchema } from './schema.js';
 
-import type { Result, SkillDoc, SkillName } from '../types/domain.js';
+import type { Result, SkillDoc } from '../types/domain.js';
 
 const frontmatterDelimiter = /^---\s*$/;
 
@@ -75,7 +75,7 @@ export function parseSkillMd(
     ok: true,
     value: {
       description: parsed.data.description,
-      name: parsed.data.name as SkillName,
+      name: parsed.data.name,
     },
   };
 }

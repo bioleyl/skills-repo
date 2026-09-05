@@ -1,17 +1,15 @@
+import { safeParseJson } from '../utils/json.js';
 import { registryIndexSchema } from './schema.js';
 
-import type { CoreError, RegistryIndex, RegistrySkill, Result, SkillName } from '../types/domain.js';
+import type { CoreError, RegistryIndex, RegistrySkill, Result } from '../types/domain.js';
 
 export function parseRegistryIndex(
   text: string
 ): Result<RegistryIndex, Extract<CoreError, { readonly type: 'invalid-index' }>> {
-  let input: unknown;
-  try {
-    input = JSON.parse(text) as unknown;
-  } catch {
+  const input = safeParseJson(text);
+  if (input === undefined) {
     return { error: { message: 'registry.json is not valid JSON', type: 'invalid-index' }, ok: false };
   }
-
   const parsed = registryIndexSchema.safeParse(input);
   if (!parsed.success) {
     return { error: { message: parsed.error.message, type: 'invalid-index' }, ok: false };
@@ -45,11 +43,11 @@ export function parseRegistryIndex(
     ok: true,
     value: {
       ...parsed.data,
-      commitSha: parsed.data.commitSha as RegistryIndex['commitSha'],
+      commitSha: parsed.data.commitSha,
       skills: parsed.data.skills.map((skill) => ({
         ...skill,
-        name: skill.name as SkillName,
-        version: skill.version as RegistrySkill['version'],
+        name: skill.name,
+        version: skill.version,
       })),
     },
   };

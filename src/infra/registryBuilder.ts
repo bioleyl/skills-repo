@@ -6,12 +6,12 @@ import { checkDocManifestConsistency, parseSkillJson } from '../core/manifest.js
 import { parseSkillMd } from '../core/skillDoc.js';
 
 import type { Dirent } from 'node:fs';
-import type { RegistryIndex, RegistrySkill, Result, Sha } from '../types/domain.js';
+import type { RegistryIndex, RegistrySkill, Result } from '../types/domain.js';
 
 const maxFileBytes = 512 * 1024;
 const maxSkillBytes = 2 * 1024 * 1024;
 const maxFiles = 20;
-const zeroSha = '0000000000000000000000000000000000000000' as Sha;
+const zeroSha = '0000000000000000000000000000000000000000';
 
 export interface RegistryBuildError {
   readonly type: 'registry-build';
@@ -159,7 +159,7 @@ export async function buildRegistry(
   return {
     ok: true,
     value: {
-      commitSha: commitSha as Sha,
+      commitSha,
       generatedAt,
       skills,
       version: 1,

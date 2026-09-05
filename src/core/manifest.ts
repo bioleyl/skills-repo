@@ -1,19 +1,17 @@
 import semver from 'semver';
 
+import { safeParseJson } from '../utils/json.js';
 import { skillManifestSchema } from './schema.js';
 
-import type { CoreError, Result, SemVer, SkillDoc, SkillManifest, SkillName } from '../types/domain.js';
+import type { CoreError, Result, SkillDoc, SkillManifest } from '../types/domain.js';
 
 export function parseSkillJson(
   text: string
 ): Result<SkillManifest, Extract<CoreError, { readonly type: 'invalid-manifest' }>> {
-  let input: unknown;
-  try {
-    input = JSON.parse(text) as unknown;
-  } catch {
+  const input = safeParseJson(text);
+  if (input === undefined) {
     return { error: { message: 'skill.json is not valid JSON', type: 'invalid-manifest' }, ok: false };
   }
-
   const parsed = skillManifestSchema.safeParse(input);
   if (!parsed.success) {
     return { error: { message: parsed.error.message, type: 'invalid-manifest' }, ok: false };
@@ -22,18 +20,10 @@ export function parseSkillJson(
     return { error: { message: 'version must be valid SemVer', type: 'invalid-manifest' }, ok: false };
   }
 
-  const { name, version, description, keywords, compatibility, author, license } = parsed.data;
+  const { name, version, description, keywords, compatibility, author, license, hooks } = parsed.data;
   return {
     ok: true,
-    value: {
-      compatibility,
-      description,
-      keywords,
-      name: name as SkillName,
-      version: version as SemVer,
-      ...(author === undefined ? {} : { author }),
-      ...(license === undefined ? {} : { license }),
-    },
+    value: { author, compatibility, description, hooks, keywords, license, name, version },
   };
 }
 

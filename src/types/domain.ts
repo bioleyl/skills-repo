@@ -1,36 +1,40 @@
 export type Result<T, E> = { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: E };
 
-export type SkillName = string & { readonly __brand: 'SkillName' };
-export type SemVer = string & { readonly __brand: 'SemVer' };
-export type Sha = string & { readonly __brand: 'Sha' };
-
 export type AgentId = 'portable' | 'claude-code' | 'codex' | 'cursor' | 'windsurf';
+export type HookName = 'preUninstall' | 'postUninstall' | 'postInstall';
+
+export type Hooks = {
+  preUninstall?: string | undefined;
+  postUninstall?: string | undefined;
+  postInstall?: string | undefined;
+};
 export type Scope = 'project' | 'user';
 
 export interface RegistrySource {
-  readonly ownerRepo: `${string}/${string}`;
+  readonly ownerRepo: string;
   readonly ref: string;
 }
 
 export interface SkillDoc {
-  readonly name: SkillName;
+  readonly name: string;
   readonly description: string;
 }
 
 export interface SkillManifest {
-  readonly name: SkillName;
-  readonly version: SemVer;
+  readonly name: string;
+  readonly version: string;
   readonly description: string;
   readonly keywords: readonly string[];
-  readonly author?: string;
-  readonly license?: string;
+  readonly author?: string | undefined;
+  readonly license?: string | undefined;
   readonly compatibility: readonly AgentId[];
+  readonly hooks?: Hooks | undefined;
 }
 
 export interface RegistrySkill {
-  readonly name: SkillName;
+  readonly name: string;
   readonly description: string;
-  readonly version: SemVer;
+  readonly version: string;
   readonly keywords: readonly string[];
   readonly path: string;
   readonly files: readonly string[];
@@ -40,7 +44,7 @@ export interface RegistrySkill {
 export interface RegistryIndex {
   readonly version: 1;
   readonly generatedAt: string;
-  readonly commitSha: Sha;
+  readonly commitSha: string;
   readonly skills: readonly RegistrySkill[];
 }
 
@@ -64,7 +68,7 @@ export interface FileOperation {
 export interface InstallPlan {
   readonly skill: SkillManifest;
   readonly source: RegistrySource;
-  readonly commitSha: Sha;
+  readonly commitSha: string;
   readonly targets: readonly InstallTarget[];
   readonly operations: readonly FileOperation[];
 }
@@ -80,9 +84,10 @@ export interface LockfileTarget {
 }
 
 export interface LockfileSkill {
-  readonly name: SkillName;
-  readonly version: SemVer;
-  readonly commitSha: Sha;
+  readonly hooks?: Hooks | undefined;
+  readonly name: string;
+  readonly version: string;
+  readonly commitSha: string;
   readonly installedAt: string;
   readonly scope: Scope;
   readonly targets: readonly LockfileTarget[];
