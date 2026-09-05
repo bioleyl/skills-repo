@@ -21,6 +21,8 @@ export function renderError(error: AppError): RenderedError {
       return { exitCode: 1, message: `Skill not found: ${error.skill}` };
     case 'registry':
       return { exitCode: 1, message: error.error.message };
+    case 'script-failed':
+      return { exitCode: 1, message: `${error.message} (${error.hook})` };
   }
   return { exitCode: 1, message: 'An unknown error occurred' };
 }
