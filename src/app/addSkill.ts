@@ -5,8 +5,9 @@ import { planInstall } from '../core/planInstall.js';
 import { parseSkillMd } from '../core/skillDoc.js';
 import { lockfilePathFor, readLockfile } from './helpers.js';
 
-import type { InstallPolicy } from '../core/targets.js';
-import type { InstallTarget } from '../types/domain.js';
+import type { InstallPolicy, TargetEnvironment } from '../core/targets.js';
+import type { InstallPlan, InstallTarget, SkillManifest } from '../types/domain.js';
+import type { ScriptExecutorPort } from '../types/ports.js';
 import type { AppContext, AppResult } from './context.js';
 
 export interface AddSkillInput {
@@ -129,8 +130,36 @@ export async function addSkill(context: AppContext, input: AddSkillInput): Promi
     return { error: { message: applied.error.message, path: applied.error.path, type: 'filesystem' }, ok: false };
   }
 
+  const hookResult = await runPostInstall(plan, manifest.value, context.environment, context.executor);
+  if (!hookResult.ok) {
+    return hookResult;
+  }
+
   return {
     ok: true,
     value: { name: manifest.value.name, targets: plan.targets, version: manifest.value.version },
   };
+}
+
+async function runPostInstall(
+  plan: InstallPlan,
+  manifest: SkillManifest,
+  environment: TargetEnvironment,
+  executor: ScriptExecutorPort
+): Promise<AppResult<void>> {
+  const hook = manifest.hooks?.postInstall;
+  if (hook === undefined) {
+    return { ok: true, value: undefined };
+  }
+  for (const target of plan.targets) {
+    const scriptPath = [target.path, hook].join(environment.separator);
+    const result = await executor.execute(scriptPath, target.path);
+    if (!result.ok) {
+      return {
+        error: { hook: 'postInstall', message: result.error.message, type: 'script-failed' },
+        ok: false,
+      };
+    }
+  }
+  return { ok: true, value: undefined };
 }

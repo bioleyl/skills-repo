@@ -8,6 +8,7 @@ import { createFsAdapter } from '../infra/fsAdapter.js';
 import { createGithubRegistryClient } from '../infra/githubClient.js';
 import { createFetchHttpClient } from '../infra/httpClient.js';
 import { createLocalRegistryClient } from '../infra/localRegistryClient.js';
+import { createScriptExecutor } from '../infra/scriptExecutor.js';
 
 import type { AppContext } from '../app/context.js';
 import type { AgentId, RegistrySource, Scope } from '../types/domain.js';
@@ -66,6 +67,7 @@ export function createRuntime(options: RuntimeOptions = {}): Runtime {
         homeDir: homedir(),
         separator,
       },
+      executor: createScriptExecutor(),
       fs,
       registry,
       source: parsed.source,

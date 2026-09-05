@@ -22,4 +22,5 @@ export function renderError(error: AppError): RenderedError {
     case 'registry':
       return { exitCode: 1, message: error.error.message };
   }
+  return { exitCode: 1, message: 'An unknown error occurred' };
 }
