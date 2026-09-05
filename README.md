@@ -65,3 +65,4 @@ The npm workflow is manually triggered from GitHub Actions using npm trusted pub
 ## License
 
 MIT.
+test
