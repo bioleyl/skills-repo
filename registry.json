@@ -1,6 +1,6 @@
 {
-  "commitSha": "45163720dccd10ffca42808e0a6d2c2a671446b2",
-  "generatedAt": "2026-09-05T07:55:21.830Z",
+  "commitSha": "5425f2a8ba1dcf62f9dfe3df8009fb553ea77060",
+  "generatedAt": "2026-09-05T08:37:17.076Z",
   "skills": [
     {
       "description": "Maintain CHANGELOG.md in Keep a Changelog format and derive the SemVer bump from commits. Use when preparing a release.",
@@ -32,8 +32,8 @@
       ],
       "name": "coding-style",
       "path": "skills/coding-style",
-      "sizeBytes": 3333,
-      "version": "1.0.1"
+      "sizeBytes": 3913,
+      "version": "1.0.2"
     },
     {
       "description": "Write Conventional Commits messages. Use for every git commit.",
