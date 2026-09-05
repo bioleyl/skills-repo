@@ -105,7 +105,11 @@ function keywordTermsMatch(keywords: readonly string[], terms: readonly string[]
 }
 
 export function searchIndex(index: RegistryIndex, query: string, keywordOnly = false): readonly SearchResult[] {
-  const terms = query.trim().toLowerCase().split(/\s+/).filter((term) => term !== '');
+  const terms = query
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .filter((term) => term !== '');
   if (terms.length === 0) {
     return [];
   }
@@ -125,9 +129,7 @@ export function searchIndex(index: RegistryIndex, query: string, keywordOnly = f
           hasMatch = true;
         }
 
-        const descScore = !keywordOnly && description.includes(term)
-          ? SCORE.descriptionMatch
-          : 0;
+        const descScore = !keywordOnly && description.includes(term) ? SCORE.descriptionMatch : 0;
         if (descScore > 0) {
           score += descScore;
           hasMatch = true;
