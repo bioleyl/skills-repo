@@ -1,0 +1,48 @@
+{
+  "registry": {
+    "ownerRepo": "bioleyl/skills-repo",
+    "ref": "main"
+  },
+  "skills": [
+    {
+      "commitSha": "45163720dccd10ffca42808e0a6d2c2a671446b2",
+      "installedAt": "2026-09-05T08:07:21.668Z",
+      "name": "coding-style",
+      "scope": "project",
+      "targets": [
+        {
+          "agent": "portable",
+          "path": ".agents/skills/coding-style"
+        }
+      ],
+      "version": "1.0.1"
+    },
+    {
+      "commitSha": "45163720dccd10ffca42808e0a6d2c2a671446b2",
+      "installedAt": "2026-09-05T08:08:23.143Z",
+      "name": "skills-repo",
+      "scope": "project",
+      "targets": [
+        {
+          "agent": "portable",
+          "path": ".agents/skills/skills-repo"
+        }
+      ],
+      "version": "1.0.0"
+    },
+    {
+      "commitSha": "45163720dccd10ffca42808e0a6d2c2a671446b2",
+      "installedAt": "2026-09-05T08:31:46.919Z",
+      "name": "commit-lint",
+      "scope": "project",
+      "targets": [
+        {
+          "agent": "portable",
+          "path": ".agents/skills/commit-lint"
+        }
+      ],
+      "version": "1.0.0"
+    }
+  ],
+  "version": 1
+}
