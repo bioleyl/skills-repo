@@ -22,7 +22,7 @@ const index: RegistryIndex = {
   skills: [
     {
       description: 'A demo skill.',
-      files: ['SKILL.md', 'skill.json'],
+      files: ['SKILL.md', 'postInstall.js', 'preUninstall.js', 'skill.json'],
       keywords: ['demo'],
       name: 'demo-skill' as SkillName,
       path: 'skills/demo-skill',
@@ -33,8 +33,13 @@ const index: RegistryIndex = {
   version: 1,
 };
 
-function fakeContext(): { readonly context: AppContext; readonly files: Map<string, string> } {
+function fakeContext(): {
+  readonly context: AppContext;
+  readonly files: Map<string, string>;
+  readonly executedScripts: readonly { readonly cwd: string; readonly scriptPath: string }[];
+} {
   const files = new Map<string, string>();
+  const executedScripts: { cwd: string; scriptPath: string }[] = [];
   const fs: FsPort = {
     apply: async (operations) => {
       for (const operation of operations) {
@@ -79,8 +84,11 @@ function fakeContext(): { readonly context: AppContext; readonly files: Map<stri
       ok: true,
       value: [
         { content: '---\nname: demo-skill\ndescription: A demo skill.\n---\n', path: 'SKILL.md' },
+        { content: 'post-install', path: 'postInstall.js' },
+        { content: 'pre-uninstall', path: 'preUninstall.js' },
         {
-          content: '{"name":"demo-skill","version":"1.0.0","description":"A demo skill.","keywords":["demo"]}',
+          content:
+            '{"name":"demo-skill","version":"1.0.0","description":"A demo skill.","keywords":["demo"],"hooks":{"postInstall":"postInstall.js","preUninstall":"preUninstall.js"}}',
           path: 'skill.json',
         },
       ],
@@ -88,7 +96,12 @@ function fakeContext(): { readonly context: AppContext; readonly files: Map<stri
     getIndex: async () => ({ ok: true, value: index }),
   };
   const executor: ScriptExecutorPort = {
-    execute: async () => ({ ok: true, value: undefined }),
+    execute: async (scriptPath, cwd) => {
+      executedScripts.push({ cwd, scriptPath });
+      return files.has(`${cwd}/${scriptPath}`)
+        ? { ok: true, value: undefined }
+        : { error: { code: null, message: 'script not found', type: 'scriptFailed' }, ok: false };
+    },
   };
   return {
     context: {
@@ -105,6 +118,7 @@ function fakeContext(): { readonly context: AppContext; readonly files: Map<stri
       registry,
       source,
     },
+    executedScripts,
     files,
   };
 }
@@ -124,11 +138,12 @@ describe('skill app use cases', () => {
   });
 
   it('adds, records, conflicts, and removes a skill', async () => {
-    const { context, files } = fakeContext();
+    const { context, executedScripts, files } = fakeContext();
     const added = await addSkill(context, { name: 'demo-skill', policy: { scope: 'project' } });
     expect(added.ok).toBe(true);
     expect(files.has('.agents/skills/demo-skill/SKILL.md')).toBe(true);
     expect(files.has('skills.lock.json')).toBe(true);
+    expect(executedScripts).toEqual([{ cwd: '.agents/skills/demo-skill', scriptPath: 'postInstall.js' }]);
 
     const conflict = await addSkill(context, { name: 'demo-skill', policy: { scope: 'project' } });
     expect(conflict).toMatchObject({ error: { type: 'conflict' }, ok: false });
@@ -136,5 +151,9 @@ describe('skill app use cases', () => {
     const removed = await removeSkills(context, ['demo-skill'], 'project');
     expect(removed).toEqual({ ok: true, value: { removed: ['demo-skill'] } });
     expect(files.has('.agents/skills/demo-skill/SKILL.md')).toBe(false);
+    expect(executedScripts).toEqual([
+      { cwd: '.agents/skills/demo-skill', scriptPath: 'postInstall.js' },
+      { cwd: '.agents/skills/demo-skill', scriptPath: 'preUninstall.js' },
+    ]);
   });
 });
