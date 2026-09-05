@@ -6,7 +6,7 @@ import { removeSkills } from '../src/app/removeSkill.js';
 
 import type { AppContext } from '../src/app/context.js';
 import type { RegistryIndex, Result, SemVer, Sha, SkillFile, SkillName } from '../src/types/domain.js';
-import type { FsError, FsPort, RegistryClientPort, RegistryError } from '../src/types/ports.js';
+import type { FsError, FsPort, RegistryClientPort, RegistryError, ScriptExecutorPort } from '../src/types/ports.js';
 
 const sha = '0123456789abcdef0123456789abcdef01234567';
 const source = { ownerRepo: 'owner/repo', ref: 'main' } as const;
@@ -81,6 +81,9 @@ function fakeContext(): { readonly context: AppContext; readonly files: Map<stri
     }),
     getIndex: async () => ({ ok: true, value: index }),
   };
+  const executor: ScriptExecutorPort = {
+    execute: async () => ({ ok: true, value: undefined }),
+  };
   return {
     context: {
       clock: { now: () => new Date('2025-09-04T12:00:00Z') },
@@ -91,6 +94,7 @@ function fakeContext(): { readonly context: AppContext; readonly files: Map<stri
         ],
       },
       environment: { homeDir: '/home/test', separator: '/' },
+      executor,
       fs,
       registry,
       source,

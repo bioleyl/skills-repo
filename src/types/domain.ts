@@ -1,5 +1,8 @@
 export type Result<T, E> = { readonly ok: true; readonly value: T } | { readonly ok: false; readonly error: E };
 
+export type SemVer = string;
+export type Sha = string;
+export type SkillName = string;
 export type AgentId = 'portable' | 'claude-code' | 'codex' | 'cursor' | 'windsurf';
 export type HookName = 'preUninstall' | 'postUninstall' | 'postInstall';
 
