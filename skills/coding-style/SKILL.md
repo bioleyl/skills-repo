@@ -7,6 +7,14 @@ description: Write clean, maintainable code with clear separation of concerns, s
 
 Understand the existing architecture and conventions before changing code. Make the smallest change that solves the problem and preserve unrelated behavior.
 
+## No magic numbers
+
+Always use named `const` values for literal numbers that carry domain meaning. A bare `100` or `60` tells the reader nothing; `SCORE.nameExactMatch` or `MAX_RETRY_COUNT` communicates intent and makes future adjustments localized.
+
+## No magic strings
+
+Always use named `const` values for literal strings that carry domain meaning. A bare `"project"` or `"user"` tells the reader nothing; `SCOPE.project` or `LOCKFILE_PATH` communicates intent. This applies to status codes, environment variable names, file paths, and any string used in more than one place.
+
 ## Structure
 
 - Keep responsibilities separated: domain rules should not perform I/O, and orchestration should not contain low-level implementation details.

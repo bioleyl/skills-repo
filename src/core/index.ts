@@ -67,14 +67,46 @@ export function findSkill(index: RegistryIndex, name: string): RegistrySkill | u
   return index.skills.find((skill) => skill.name === name);
 }
 
+const SCORE = {
+  descriptionMatch: 20,
+  keywordMatch: 30,
+  nameExactMatch: 100,
+  namePartialMatch: 40,
+  namePrefixMatch: 60,
+} as const;
+
 export interface SearchResult {
   readonly skill: RegistrySkill;
   readonly score: number;
 }
 
+function scoreNameMatch(name: string, term: string): number {
+  if (name === term) {
+    return SCORE.nameExactMatch;
+  }
+  if (name.startsWith(term)) {
+    return SCORE.namePrefixMatch;
+  }
+  if (name.includes(term)) {
+    return SCORE.namePartialMatch;
+  }
+  return 0;
+}
+
+function scoreKeywordMatch(keywords: readonly string[], term: string): number {
+  if (keywords.some((keyword) => keyword.toLowerCase().includes(term))) {
+    return SCORE.keywordMatch;
+  }
+  return 0;
+}
+
+function keywordTermsMatch(keywords: readonly string[], terms: readonly string[]): boolean {
+  return keywords.some((keyword) => terms.some((term) => keyword.toLowerCase().includes(term)));
+}
+
 export function searchIndex(index: RegistryIndex, query: string, keywordOnly = false): readonly SearchResult[] {
-  const needle = query.trim().toLowerCase();
-  if (needle === '') {
+  const terms = query.trim().toLowerCase().split(/\s+/).filter((term) => term !== '');
+  if (terms.length === 0) {
     return [];
   }
 
@@ -82,26 +114,37 @@ export function searchIndex(index: RegistryIndex, query: string, keywordOnly = f
     .map((skill) => {
       const name = skill.name.toLowerCase();
       const description = skill.description.toLowerCase();
-      const keywordMatch = skill.keywords.some((keyword) => keyword.toLowerCase().includes(needle));
-      if (keywordOnly && !keywordMatch) {
+
+      let score = 0;
+      let hasMatch = false;
+
+      for (const term of terms) {
+        const nameScore = scoreNameMatch(name, term);
+        if (nameScore > 0) {
+          score += nameScore;
+          hasMatch = true;
+        }
+
+        const descScore = !keywordOnly && description.includes(term)
+          ? SCORE.descriptionMatch
+          : 0;
+        if (descScore > 0) {
+          score += descScore;
+          hasMatch = true;
+        }
+
+        const keywordScore = scoreKeywordMatch(skill.keywords, term);
+        if (keywordScore > 0) {
+          score += keywordScore;
+          hasMatch = true;
+        }
+      }
+
+      if (keywordOnly && !keywordTermsMatch(skill.keywords, terms)) {
         return undefined;
       }
 
-      let score = 0;
-      if (name === needle) {
-        score += 100;
-      } else if (name.startsWith(needle)) {
-        score += 60;
-      } else if (name.includes(needle)) {
-        score += 40;
-      }
-      if (!keywordOnly && description.includes(needle)) {
-        score += 20;
-      }
-      if (keywordMatch) {
-        score += 30;
-      }
-      return score === 0 ? undefined : { score, skill };
+      return hasMatch ? { score, skill } : undefined;
     })
     .filter((result): result is SearchResult => result !== undefined)
     .sort((left, right) => right.score - left.score || left.skill.name.localeCompare(right.skill.name));
