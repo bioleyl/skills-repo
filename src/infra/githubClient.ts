@@ -50,6 +50,30 @@ export function createGithubRegistryClient(http: HttpPort, options: GithubClient
     Object.assign(headers, Object.fromEntries([['Authorization', `Bearer ${options.token}`]]));
   }
 
+  const defaultBranchApi = (ownerRepo: string): string =>
+    `https://api.github.com/repos/${encodedPath(ownerRepo)}/branches/main`;
+
+  const resolveRef = async (source: RegistrySource, ref: string): Promise<Result<string, RegistryError>> => {
+    const response = await http.get(defaultBranchApi(source.ownerRepo));
+    if (!response.ok) {
+      return { error: errorFromHttp(response.error), ok: false };
+    }
+    if (response.value.status !== 200) {
+      return {
+        error: {
+          message: `GitHub returned HTTP ${response.value.status}`,
+          status: response.value.status,
+          type: response.value.status === 404 ? 'not-found' : 'invalid-response',
+        },
+        ok: false,
+      };
+    }
+    const parsed = JSON.parse(response.value.body) as { readonly name: string };
+    return parsed.name === undefined
+      ? { error: { message: 'GitHub default branch response is missing name', type: 'invalid-response' }, ok: false }
+      : { ok: true, value: parsed.name };
+  };
+
   const rawUrl = (source: RegistrySource, ref: string, path: string): string =>
     `https://raw.githubusercontent.com/${encodedPath(source.ownerRepo)}/${encodedPath(ref)}/${encodedPath(path)}`;
   const treeUrl = (source: RegistrySource): string =>
@@ -126,10 +150,21 @@ export function createGithubRegistryClient(http: HttpPort, options: GithubClient
     },
     async getIndex(source) {
       const response = await getText(rawUrl(source, source.ref, 'registry.json'));
-      if (!response.ok) {
+      if (response.ok) {
+        const parsed = parseRegistryIndex(response.value);
+        return parsed.ok
+          ? parsed
+          : { error: { message: parsed.error.message, type: 'invalid-response' }, ok: false };
+      }
+      const branch = await resolveRef(source, source.ref);
+      if (!branch.ok || branch.value === source.ref) {
         return response;
       }
-      const parsed = parseRegistryIndex(response.value);
+      const fallbackResponse = await getText(rawUrl(source, branch.value, 'registry.json'));
+      if (!fallbackResponse.ok) {
+        return response;
+      }
+      const parsed = parseRegistryIndex(fallbackResponse.value);
       return parsed.ok
         ? parsed
         : { error: { message: parsed.error.message, type: 'invalid-response' }, ok: false };
