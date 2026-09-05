@@ -1,6 +1,6 @@
 {
   "name": "coding-style",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Write clean, maintainable code with clear separation of concerns, small pure functions, early-return control flow, and no nested ternaries. Use when implementing, reviewing, or refactoring code.",
   "keywords": ["coding", "style", "clean-code", "architecture"],
   "license": "MIT"

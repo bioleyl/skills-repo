@@ -22,6 +22,14 @@ Understand the existing architecture and conventions before changing code. Make 
 - Never use nested ternaries. If the logic needs more branching than a simple ternary or an early return, the function is doing too much: split it into smaller functions with clear responsibilities.
 - Avoid deeply nested loops and callbacks; extract the inner operation when it needs its own explanation.
 
+## Function shape
+
+- Prefer `const` over `let`. If a value would need to be assigned across a `try` block or multiple branches, extract that work into a named function that returns a `Result` or an explicit value.
+- Keep orchestration functions short and phase-oriented. Extract setup, validation, execution, rollback, cleanup, and rendering into separate helpers when they have distinct responsibilities.
+- Keep effectful boundaries explicit. A filesystem or network helper should perform one operation and return a structured result; callers should coordinate those results rather than mixing low-level effects with business rules.
+- Avoid mutable state used only to carry context between branches, such as a `currentPath` variable for error reporting. Pass the context into a helper or return it with the operation result.
+- Prefer named predicates and helpers over inline conditionals when they make a failure path or invariant easier to understand.
+
 ## Verification
 
 - Preserve the existing public contract unless a breaking change is intentional.
