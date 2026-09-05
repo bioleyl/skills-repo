@@ -5,8 +5,8 @@
   },
   "skills": [
     {
-      "commitSha": "45163720dccd10ffca42808e0a6d2c2a671446b2",
-      "installedAt": "2026-09-05T08:07:21.668Z",
+      "commitSha": "c11453e71971baf676d860f15ddfebb3014ca291",
+      "installedAt": "2026-09-05T11:34:32.326Z",
       "name": "coding-style",
       "scope": "project",
       "targets": [
@@ -15,11 +15,11 @@
           "path": ".agents/skills/coding-style"
         }
       ],
-      "version": "1.0.1"
+      "version": "1.0.2"
     },
     {
-      "commitSha": "45163720dccd10ffca42808e0a6d2c2a671446b2",
-      "installedAt": "2026-09-05T08:08:23.143Z",
+      "commitSha": "c11453e71971baf676d860f15ddfebb3014ca291",
+      "installedAt": "2026-09-05T11:34:32.337Z",
       "name": "skills-repo",
       "scope": "project",
       "targets": [
@@ -31,17 +31,25 @@
       "version": "1.0.0"
     },
     {
-      "commitSha": "45163720dccd10ffca42808e0a6d2c2a671446b2",
-      "installedAt": "2026-09-05T08:31:46.919Z",
+      "commitSha": "c11453e71971baf676d860f15ddfebb3014ca291",
+      "hooks": {
+        "postInstall": "postInstall.js",
+        "preUninstall": "preUninstall.js"
+      },
+      "installedAt": "2026-09-05T12:31:19.740Z",
       "name": "commit-lint",
       "scope": "project",
       "targets": [
         {
           "agent": "portable",
           "path": ".agents/skills/commit-lint"
+        },
+        {
+          "agent": "claude-code",
+          "path": ".claude/skills/commit-lint"
         }
       ],
-      "version": "1.0.0"
+      "version": "1.1.0"
     }
   ],
   "version": 1
