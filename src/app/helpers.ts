@@ -18,13 +18,13 @@ export async function readLockfile(
   }
   const parsed = parseLockfile(content.value);
   if (!parsed.ok) {
-    return { error: { message: parsed.error.message, type: 'invalid-lockfile' }, ok: false };
+    return { error: { message: parsed.error.message, type: 'invalidLockfile' }, ok: false };
   }
   if (parsed.value.registry.ownerRepo !== source.ownerRepo || parsed.value.registry.ref !== source.ref) {
     return {
       error: {
         message: `Lockfile belongs to ${parsed.value.registry.ownerRepo}@${parsed.value.registry.ref}`,
-        type: 'invalid-lockfile',
+        type: 'invalidLockfile',
       },
       ok: false,
     };

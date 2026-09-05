@@ -106,5 +106,5 @@ export type CoreError =
   | { readonly type: 'invalid-document'; readonly message: string }
   | { readonly type: 'invalid-manifest'; readonly message: string }
   | { readonly type: 'invalid-index'; readonly message: string }
-  | { readonly type: 'invalid-lockfile'; readonly message: string }
+  | { readonly type: 'invalidLockfile'; readonly message: string }
   | { readonly type: 'inconsistent-skill'; readonly message: string };

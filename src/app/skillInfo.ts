@@ -27,7 +27,7 @@ export async function skillInfo(
   }
   const entry = findSkill(index.value, name);
   if (entry === undefined) {
-    return { error: { skill: name, type: 'not-found' }, ok: false };
+    return { error: { skill: name, type: 'notFound' }, ok: false };
   }
 
   const files = await context.registry.fetchSkillFiles(
@@ -42,23 +42,23 @@ export async function skillInfo(
   const document = files.value.find((file) => file.path === 'SKILL.md');
   const manifestFile = files.value.find((file) => file.path === 'skill.json');
   if (document === undefined || manifestFile === undefined) {
-    return { error: { message: 'Skill is missing SKILL.md or skill.json', type: 'invalid-skill' }, ok: false };
+    return { error: { message: 'Skill is missing SKILL.md or skill.json', type: 'invalidSkill' }, ok: false };
   }
   const parsedDoc = parseSkillMd(document.content);
   const parsedManifest = parseSkillJson(manifestFile.content);
   if (!parsedDoc.ok) {
-    return { error: { message: parsedDoc.error.message, type: 'invalid-skill' }, ok: false };
+    return { error: { message: parsedDoc.error.message, type: 'invalidSkill' }, ok: false };
   }
   if (!parsedManifest.ok) {
-    return { error: { message: parsedManifest.error.message, type: 'invalid-skill' }, ok: false };
+    return { error: { message: parsedManifest.error.message, type: 'invalidSkill' }, ok: false };
   }
   const consistent = checkDocManifestConsistency(parsedDoc.value, parsedManifest.value);
   if (!consistent.ok) {
-    return { error: { message: consistent.error.message, type: 'invalid-skill' }, ok: false };
+    return { error: { message: consistent.error.message, type: 'invalidSkill' }, ok: false };
   }
   if (parsedManifest.value.name !== entry.name || parsedManifest.value.version !== entry.version) {
     return {
-      error: { message: 'Downloaded skill metadata does not match registry.json', type: 'invalid-skill' },
+      error: { message: 'Downloaded skill metadata does not match registry.json', type: 'invalidSkill' },
       ok: false,
     };
   }

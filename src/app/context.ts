@@ -22,11 +22,13 @@ export interface AppContext {
 export type AppError =
   | { readonly type: 'registry'; readonly error: RegistryError }
   | { readonly type: 'filesystem'; readonly message: string; readonly path: string }
-  | { readonly type: 'not-found'; readonly skill: string }
+  | { readonly type: 'notFound'; readonly skill: string }
   | { readonly type: 'conflict'; readonly paths: readonly string[] }
-  | { readonly type: 'invalid-skill'; readonly message: string }
+  | { readonly type: 'invalidSkill'; readonly message: string }
   | { readonly type: 'incompatible'; readonly agents: readonly string[] }
-  | { readonly type: 'invalid-lockfile'; readonly message: string }
-  | { readonly type: 'script-failed'; readonly message: string; readonly hook: string };
+  | { readonly type: 'invalidLockfile'; readonly message: string }
+  | { readonly type: 'scriptFailed'; readonly message: string; readonly hook: string };
+
+export type AppErrorTypes = AppError['type'];
 
 export type AppResult<T> = Result<T, AppError>;

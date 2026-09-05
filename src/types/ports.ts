@@ -35,7 +35,7 @@ export interface RegistryClientPort {
 }
 
 export interface RegistryError {
-  readonly type: 'network' | 'not-found' | 'invalid-response';
+  readonly type: 'network' | 'notFound' | 'invalid-response';
   readonly message: string;
   readonly status?: number;
 }
@@ -77,7 +77,7 @@ export interface ScriptExecutorPort {
 }
 
 export interface ScriptError {
-  readonly type: 'script-failed';
+  readonly type: 'scriptFailed';
   readonly message: string;
   readonly code: number | null;
 }

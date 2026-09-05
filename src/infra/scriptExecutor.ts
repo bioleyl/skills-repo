@@ -11,7 +11,7 @@ export function createScriptExecutor(): ScriptExecutorPort {
       const absolute = isAbsolute(scriptPath) ? scriptPath : resolve(cwd, scriptPath);
       if (!existsSync(absolute)) {
         return {
-          error: { code: null, message: `Script not found: ${scriptPath}`, type: 'script-failed' },
+          error: { code: null, message: `Script not found: ${scriptPath}`, type: 'scriptFailed' },
           ok: false,
         };
       }
@@ -30,7 +30,7 @@ export function createScriptExecutor(): ScriptExecutorPort {
               error: {
                 code,
                 message: `Hook exited with code ${code}`,
-                type: 'script-failed',
+                type: 'scriptFailed',
               },
               ok: false,
             });
@@ -39,7 +39,7 @@ export function createScriptExecutor(): ScriptExecutorPort {
 
         child.on('error', () => {
           resolve({
-            error: { code: null, message: `Failed to execute script: ${scriptPath}`, type: 'script-failed' },
+            error: { code: null, message: `Failed to execute script: ${scriptPath}`, type: 'scriptFailed' },
             ok: false,
           });
         });

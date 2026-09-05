@@ -13,14 +13,14 @@ import type {
 
 export function parseLockfile(
   text: string
-): Result<Lockfile, Extract<CoreError, { readonly type: 'invalid-lockfile' }>> {
+): Result<Lockfile, Extract<CoreError, { readonly type: 'invalidLockfile' }>> {
   const input = safeParseJson(text);
   if (input === undefined) {
-    return { error: { message: 'lockfile is not valid JSON', type: 'invalid-lockfile' }, ok: false };
+    return { error: { message: 'lockfile is not valid JSON', type: 'invalidLockfile' }, ok: false };
   }
   const parsed = lockfileSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: { message: parsed.error.message, type: 'invalid-lockfile' }, ok: false };
+    return { error: { message: parsed.error.message, type: 'invalidLockfile' }, ok: false };
   }
   return { ok: true, value: parsed.data as Lockfile };
 }

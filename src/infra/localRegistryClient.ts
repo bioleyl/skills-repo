@@ -14,7 +14,7 @@ function isSafeRelativePath(path: string): boolean {
 export function createLocalRegistryClient(fs: FsPort, root: string): RegistryClientPort {
   const read = async (path: string): Promise<Result<string, RegistryError>> => {
     const result = await fs.readFile(`${root}/${path}`);
-    return result.ok ? result : { error: { message: result.error.message, type: 'not-found' }, ok: false };
+    return result.ok ? result : { error: { message: result.error.message, type: 'notFound' }, ok: false };
   };
 
   return {

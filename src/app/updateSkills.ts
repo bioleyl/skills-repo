@@ -39,7 +39,7 @@ export async function updateSkills(
       : lockfile.value.skills.filter((skill) => names.includes(skill.name));
   const missing = names?.find((name) => !lockfile.value.skills.some((skill) => skill.name === name));
   if (missing !== undefined) {
-    return { error: { skill: missing, type: 'not-found' }, ok: false };
+    return { error: { skill: missing, type: 'notFound' }, ok: false };
   }
 
   const updates: UpdateSkill[] = [];

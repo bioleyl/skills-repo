@@ -118,7 +118,7 @@ describe('skill app use cases', () => {
     );
 
     await expect(readLockfile(context, 'project', source)).resolves.toMatchObject({
-      error: { type: 'invalid-lockfile' },
+      error: { type: 'invalidLockfile' },
       ok: false,
     });
   });

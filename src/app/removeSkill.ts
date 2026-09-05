@@ -23,7 +23,7 @@ export async function removeSkills(
   const entries = names.map((name) => lockfile.value.skills.find((skill) => skill.name === name));
   const missing = names.find((_, index) => entries[index] === undefined);
   if (missing !== undefined) {
-    return { error: { skill: missing, type: 'not-found' }, ok: false };
+    return { error: { skill: missing, type: 'notFound' }, ok: false };
   }
 
   const paths: string[] = [];
@@ -40,7 +40,7 @@ export async function removeSkills(
     for (const target of entry.targets) {
       if (!expected.includes(target.path)) {
         return {
-          error: { message: `Lockfile target is not derived: ${target.path}`, type: 'invalid-lockfile' },
+          error: { message: `Lockfile target is not derived: ${target.path}`, type: 'invalidLockfile' },
           ok: false,
         };
       }
@@ -91,7 +91,7 @@ async function runUninstallHooks(
       const result = await executor.execute(scriptPath, target.path);
       if (!result.ok) {
         return {
-          error: { hook: hookName, message: result.error.message, type: 'script-failed' },
+          error: { hook: hookName, message: result.error.message, type: 'scriptFailed' },
           ok: false,
         };
       }

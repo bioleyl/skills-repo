@@ -24,7 +24,7 @@ export interface AddSkillOutput {
 }
 
 function invalidSkill(message: string): AppResult<never> {
-  return { error: { message, type: 'invalid-skill' }, ok: false };
+  return { error: { message, type: 'invalidSkill' }, ok: false };
 }
 
 export async function addSkill(context: AppContext, input: AddSkillInput): Promise<AppResult<AddSkillOutput>> {
@@ -34,7 +34,7 @@ export async function addSkill(context: AppContext, input: AddSkillInput): Promi
   }
   const entry = findSkill(indexResult.value, input.name);
   if (entry === undefined) {
-    return { error: { skill: input.name, type: 'not-found' }, ok: false };
+    return { error: { skill: input.name, type: 'notFound' }, ok: false };
   }
 
   const filesResult = await context.registry.fetchSkillFiles(
@@ -156,7 +156,7 @@ async function runPostInstall(
     const result = await executor.execute(scriptPath, target.path);
     if (!result.ok) {
       return {
-        error: { hook: 'postInstall', message: result.error.message, type: 'script-failed' },
+        error: { hook: 'postInstall', message: result.error.message, type: 'scriptFailed' },
         ok: false,
       };
     }

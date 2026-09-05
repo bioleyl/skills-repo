@@ -32,7 +32,7 @@ function errorFromHttp(result: {
     : {
         message: result.message,
         ...(result.status === undefined ? {} : { status: result.status }),
-        type: result.status === 404 ? 'not-found' : 'invalid-response',
+        type: result.status === 404 ? 'notFound' : 'invalid-response',
       };
 }
 
@@ -63,14 +63,17 @@ export function createGithubRegistryClient(http: HttpPort, options: GithubClient
         error: {
           message: `GitHub returned HTTP ${response.value.status}`,
           status: response.value.status,
-          type: response.value.status === 404 ? 'not-found' : 'invalid-response',
+          type: response.value.status === 404 ? 'notFound' : 'invalid-response',
         },
         ok: false,
       };
     }
     const parsed = JSON.parse(response.value.body) as { readonly name: string };
     return parsed.name === undefined
-      ? { error: { message: 'GitHub default branch response is missing name', type: 'invalid-response' }, ok: false }
+      ? {
+          error: { message: 'GitHub default branch response is missing name', type: 'invalid-response' },
+          ok: false,
+        }
       : { ok: true, value: parsed.name };
   };
 
@@ -89,7 +92,7 @@ export function createGithubRegistryClient(http: HttpPort, options: GithubClient
         error: {
           message: `GitHub returned HTTP ${response.value.status}`,
           status: response.value.status,
-          type: response.value.status === 404 ? 'not-found' : 'invalid-response',
+          type: response.value.status === 404 ? 'notFound' : 'invalid-response',
         },
         ok: false,
       };
