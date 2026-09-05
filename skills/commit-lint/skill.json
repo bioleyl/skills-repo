@@ -1,7 +1,7 @@
 {
   "name": "commit-lint",
-  "version": "1.0.0",
-  "description": "Write Conventional Commits messages. Use for every git commit.",
+  "version": "1.1.0",
+  "description": "Write Conventional Commits messages and enforce them via git hook. Use for every git commit.",
   "keywords": ["git", "commits"],
   "license": "MIT"
 }

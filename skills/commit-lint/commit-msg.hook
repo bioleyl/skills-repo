@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# Conventional Commits enforcement
+# https://www.conventionalcommits.org/en/v1.0.0/
+
+set -euo pipefail
+
+commit_msg_file="$1"
+commit_msg=$(cat "$commit_msg_file")
+
+# Strip comments (lines starting with #)
+stripped=$(echo "$commit_msg" | grep -v '^#' || true)
+subject=$(echo "$stripped" | head -1)
+
+# Pattern: type(scope): description  OR  type: description
+# Types: feat, fix, docs, style, refactor, test, build, ci, chore, perf, revert
+if ! echo "$subject" | grep -qE '^(feat|fix|docs|style|refactor|test|build|ci|chore|perf|revert)(\(.+\))?!?:[[:space:]].+'; then
+  echo "" >&2
+  echo "❌ Invalid commit message:" >&2
+  echo "   '$subject'" >&2
+  echo "" >&2
+  echo "Expected format: type(scope): description" >&2
+  echo "" >&2
+  echo "Valid types: feat, fix, docs, style, refactor, test, build, ci, chore, perf, revert" >&2
+  echo "Example: feat(cli): add multi-word search support" >&2
+  echo "" >&2
+  exit 1
+fi
+
+# Warn if subject exceeds 72 characters
+if [ ${#subject} -gt 72 ]; then
+  echo "⚠️  Warning: subject line is ${#subject} characters (max 72): '$subject'" >&2
+fi
+
+# Warn if description exceeds 100 characters in the body
+body=$(echo "$stripped" | tail -n +2)
+if [ -n "$body" ]; then
+  while IFS= read -r line; do
+    line_length=${#line}
+    if [ "$line_length" -gt 100 ] && [ "$line_length" -gt 0 ]; then
+      echo "⚠️  Warning: body line is $line_length characters (max 100)" >&2
+    fi
+  done <<< "$body"
+fi
