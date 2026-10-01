@@ -32,7 +32,7 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.5.12",
+    "@biomejs/biome": "2.5.14",
     "@types/node": "^26.4.1",
     "@types/semver": "^7.7.0",
     "dependency-cruiser": "^18.2.0",
